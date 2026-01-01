@@ -44,16 +44,16 @@ const LOCAL_CARDS = {
     "Esposas de cuero",
     "Ducha caliente",
     "Un consolador",
-    "Cinturón",
+    "Cinturón de castidad",
     "Lencería de encaje",
     "Besos en el cuello",
     "Sexo anal",
-    "Striptease",
+    "Hacer un Striptease",
     "Cubos de hielo",
     "Lubricante",
-    "Vibrador",
-    "Ascensor",
-    "Oría",
+    "Un vibrador",
+    "Sexo en un ascensor",
+    "Una orgía",
     "Sexo oral"
   ]
 };
@@ -63,13 +63,15 @@ const Icons = {
   Flame: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg>,
   Draw: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m12 19 7-7 3 3-7 7-3-3Z"/><path d="m18 13-1.5-7.5L2 2l3.5 14.5L13 18l5-5Z"/><path d="m2 2 5 5"/><path d="m8.5 8.5 7 7"/></svg>,
   Users: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>,
-  Refresh: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/></svg>,
   Home: () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>,
-  Lock: () => <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#ff0055" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>,
+  Lock: () => <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>,
+  Sun: () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>,
+  Moon: () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>,
 };
 
 const App = () => {
   const [screen, setScreen] = useState('age_check');
+  const [theme, setTheme] = useState<'dark' | 'light'>('dark');
   const [players, setPlayers] = useState<{id: number, name: string, points: number}[]>([]);
   const [activePlayerIndex, setActivePlayerIndex] = useState(0);
   const [mode, setMode] = useState<null | 'truth_or_shot' | 'never_have_i_ever' | 'pictorami'>(null);
@@ -78,9 +80,10 @@ const App = () => {
   const [pool, setPool] = useState({...LOCAL_CARDS});
   const [newPlayerName, setNewPlayerName] = useState("");
   const [usedContent, setUsedContent] = useState<string[]>([]);
-  
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const isDrawing = useRef(false);
+
+  const toggleTheme = () => {
+    setTheme(prev => prev === 'dark' ? 'light' : 'dark');
+  };
 
   const getAiContent = async (selectedMode: string) => {
     try {
@@ -91,20 +94,19 @@ const App = () => {
       } else if (selectedMode === 'never_have_i_ever') {
         prompt = "Genera un 'Yo nunca nunca' extremadamente sexual y atrevido para adultos. Español Latino. Máximo 12 palabras.";
       } else {
-        prompt = "Genera UNA SOLA PALABRA o frase cortísima (máximo 2 palabras) de un objeto, acción o fetiche sexual para un juego de dibujo. Solo la palabra.";
+        prompt = "Genera una palabra de un objeto o acción sexual para dibujar. Solo la palabra, máximo 2 palabras.";
       }
 
       const response = await ai.models.generateContent({
         model: 'gemini-3-flash-preview',
         contents: prompt,
         config: {
-          systemInstruction: "Eres un DJ animador de fiestas para adultos. Tu lenguaje es crudo, directo y sexy. No saludes, no uses comillas, solo entrega el reto/pregunta/palabra.",
+          systemInstruction: "Eres un animador de despedidas de soltero. Tu lenguaje es atrevido y directo. No uses saludos, ni comillas, solo la frase o palabra.",
           temperature: 0.95,
         }
       });
       return response.text.trim();
     } catch (e) {
-      console.error(e);
       return null;
     }
   };
@@ -113,24 +115,21 @@ const App = () => {
     setLoading(true);
     let card = "";
 
-    // Lógica para evitar repeticiones
     const findUniqueCard = async () => {
       if (pool[selectedMode].length > 0) {
         const randomIndex = Math.floor(Math.random() * pool[selectedMode].length);
         const selectedCard = pool[selectedMode][randomIndex];
-        // Quitar del pool local
         const newSubPool = pool[selectedMode].filter((_, i) => i !== randomIndex);
         setPool(prev => ({...prev, [selectedMode]: newSubPool}));
         return selectedCard;
       } else {
-        // Si el pool local se agota, usamos IA asegurando que no se repita en el historial de esta sesión
         let aiCard = await getAiContent(selectedMode);
         let retries = 0;
         while (aiCard && usedContent.includes(aiCard) && retries < 3) {
           aiCard = await getAiContent(selectedMode);
           retries++;
         }
-        return aiCard || "¡Error de conexión! Castigo: 2 shots.";
+        return aiCard || "¡Error! Castigo: 2 shots.";
       }
     };
 
@@ -143,9 +142,7 @@ const App = () => {
   const handleNextTurn = (success: boolean) => {
     if (players.length > 0) {
       const newPlayers = [...players];
-      if (success) {
-        newPlayers[activePlayerIndex].points += 10;
-      }
+      if (success) newPlayers[activePlayerIndex].points += 10;
       setPlayers(newPlayers);
       setActivePlayerIndex((prev) => (prev + 1) % players.length);
     }
@@ -159,257 +156,192 @@ const App = () => {
     }
   };
 
-  // --- Funciones de Dibujo ---
-  const startDrawing = (e: React.MouseEvent | React.TouchEvent) => {
-    isDrawing.current = true;
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-    const rect = canvas.getBoundingClientRect();
-    const x = ('touches' in e) ? e.touches[0].clientX - rect.left : (e as React.MouseEvent).clientX - rect.left;
-    const y = ('touches' in e) ? e.touches[0].clientY - rect.top : (e as React.MouseEvent).clientY - rect.top;
-    ctx.beginPath();
-    ctx.moveTo(x, y);
-    ctx.strokeStyle = '#bc13fe';
-    ctx.lineWidth = 4;
-    ctx.lineCap = 'round';
-  };
-
-  const draw = (e: React.MouseEvent | React.TouchEvent) => {
-    if (!isDrawing.current || !canvasRef.current) return;
-    const canvas = canvasRef.current;
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-    const rect = canvas.getBoundingClientRect();
-    const x = ('touches' in e) ? e.touches[0].clientX - rect.left : (e as React.MouseEvent).clientX - rect.left;
-    const y = ('touches' in e) ? e.touches[0].clientY - rect.top : (e as React.MouseEvent).clientY - rect.top;
-    ctx.lineTo(x, y);
-    ctx.stroke();
-  };
-
-  const stopDrawing = () => { isDrawing.current = false; };
-
-  const clearCanvas = () => {
-    const canvas = canvasRef.current;
-    if (canvas) {
-      const ctx = canvas.getContext('2d');
-      ctx?.clearRect(0, 0, canvas.width, canvas.height);
-    }
-  };
-
   const HomeButton = () => (
-    <button 
-      onClick={() => setScreen('entry')}
-      className="fixed top-6 left-6 z-[100] glass p-3 rounded-full text-white/60 hover:text-white hover:bg-white/10 transition-all border border-white/20 active:scale-90 shadow-lg"
-    >
-      <Icons.Home />
-    </button>
+    <div className="fixed top-6 left-6 z-[100] flex gap-2">
+      <button 
+        onClick={() => setScreen('entry')}
+        className={`glass p-3 rounded-full transition-all active:scale-90 border border-white/20 shadow-lg ${theme === 'dark' ? 'bg-white/5 text-white/60 hover:text-white' : 'bg-black/5 text-black/60 hover:text-black'}`}
+      >
+        <Icons.Home />
+      </button>
+      <button 
+        onClick={toggleTheme}
+        className={`glass p-3 rounded-full transition-all active:scale-90 border border-white/20 shadow-lg ${theme === 'dark' ? 'bg-white/5 text-white/60 hover:text-white' : 'bg-black/5 text-black/60 hover:text-black'}`}
+      >
+        {theme === 'dark' ? <Icons.Sun /> : <Icons.Moon />}
+      </button>
+    </div>
   );
 
-  // --- Pantallas ---
-
-  if (screen === 'underage') {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-screen p-6 text-center animate-in fade-in zoom-in duration-700 bg-[#050505]">
-        <div className="mb-8 p-6 rounded-full bg-red-500/10 border-4 border-red-500 animate-pulse">
-          <Icons.Lock />
+  return (
+    <div className={`min-h-screen transition-colors duration-500 selection:bg-[#ff0055] selection:text-white font-sans ${theme === 'dark' ? 'bg-[#0a0a0c] text-white club-gradient' : 'bg-[#f8f9fa] text-[#1a1a1a] light-theme'}`}>
+      
+      {screen === 'underage' && (
+        <div className="flex flex-col items-center justify-center min-h-screen p-6 text-center animate-in fade-in duration-1000">
+          <div className={`mb-8 p-6 rounded-full animate-pulse border-4 ${theme === 'dark' ? 'bg-red-500/10 border-red-500' : 'bg-red-500/20 border-red-600'}`}>
+            <Icons.Lock />
+          </div>
+          <h1 className={`font-bebas text-7xl mb-4 tracking-wider ${theme === 'dark' ? 'text-red-500' : 'text-red-700'}`}>PROHIBIDO</h1>
+          <p className={`text-2xl max-w-sm leading-relaxed ${theme === 'dark' ? 'text-zinc-400' : 'text-zinc-600'}`}>
+            Te esperamos cuando seas mayor de edad para liberar tus instintos. Vuelve pronto.
+          </p>
+          <div className={`mt-12 w-32 h-1 rounded-full blur-sm ${theme === 'dark' ? 'bg-red-500/50' : 'bg-red-700/50'}`}></div>
         </div>
-        <h1 className="font-bebas text-6xl mb-4 text-red-500 tracking-wider">PACIENCIA, PECADOR...</h1>
-        <p className="text-zinc-400 text-xl max-w-xs leading-relaxed">
-          Este territorio es solo para adultos. Te esperamos cuando cumplas la mayoría de edad para liberar tus instintos.
-        </p>
-        <div className="mt-12 w-24 h-1 bg-gradient-to-r from-transparent via-red-500 to-transparent"></div>
-      </div>
-    );
-  }
+      )}
 
-  if (screen === 'age_check') {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-screen p-6 text-center animate-in fade-in duration-500">
-        <div className="glass p-10 rounded-[40px] max-w-md w-full border-t-4 border-[#ff0055] shadow-2xl relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-32 h-32 bg-red-500/10 blur-3xl -z-10"></div>
-          <h1 className="font-bebas text-8xl mb-6 neon-text-red">18+</h1>
-          <p className="text-xl mb-10 font-medium text-zinc-300">Este juego contiene contenido sexual explícito y retos prohibidos.</p>
-          <div className="flex flex-col gap-4">
-            <button onClick={() => setScreen('entry')} className="btn-primary py-5 rounded-2xl font-black text-xl uppercase tracking-widest shadow-lg shadow-red-500/20">Soy Mayor</button>
-            {/* Fix: Added missing logic to set screen to 'underage' when clicking the second button */}
-            <button onClick={() => setScreen('underage')} className="py-3 text-zinc-500 hover:text-zinc-300 transition-colors">Soy Menor de Edad</button>
+      {screen === 'age_check' && (
+        <div className="flex flex-col items-center justify-center min-h-screen p-6 text-center">
+          <div className={`glass p-12 rounded-[50px] max-w-md w-full border-t-8 border-[#ff0055] shadow-2xl ${theme === 'dark' ? 'bg-white/5' : 'bg-black/5'}`}>
+            <h1 className={`font-bebas text-9xl mb-6 drop-shadow-[0_0_15px_rgba(255,0,85,0.5)] ${theme === 'dark' ? 'text-white' : 'text-black'}`}>18+</h1>
+            <p className={`text-xl mb-12 font-semibold ${theme === 'dark' ? 'text-zinc-300' : 'text-zinc-700'}`}>Este juego contiene contenido sexual explícito y lenguaje para adultos.</p>
+            <div className="flex flex-col gap-5">
+              <button onClick={() => setScreen('entry')} className="btn-primary py-6 rounded-3xl font-black text-2xl uppercase tracking-widest shadow-xl text-white">Soy Mayor</button>
+              <button onClick={() => setScreen('underage')} className={`py-4 transition-colors uppercase text-sm font-bold tracking-widest ${theme === 'dark' ? 'text-zinc-500 hover:text-red-500' : 'text-zinc-400 hover:text-red-600'}`}>Soy Menor</button>
+            </div>
           </div>
         </div>
-      </div>
-    );
-  }
+      )}
 
-  // --- Entry Screen Fix: Added the missing entry screen logic ---
-  if (screen === 'entry') {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-screen p-6 max-w-md mx-auto animate-in fade-in slide-in-from-bottom-10 duration-700">
-        <h1 className="font-bebas text-6xl mb-8 text-white tracking-tighter">PREVIOS <span className="text-[#ff0055]">HOT</span></h1>
-        
-        <div className="w-full glass p-6 rounded-3xl mb-8 border-l-4 border-[#ff0055]">
-          <h2 className="text-xl font-bold mb-4 flex items-center gap-2"><Icons.Users /> PECADORES:</h2>
-          <div className="flex gap-2 mb-4">
-            <input 
-              type="text" 
-              value={newPlayerName} 
-              onChange={(e) => setNewPlayerName(e.target.value)}
-              placeholder="Nombre del pecador..."
-              className="bg-white/5 border border-white/10 rounded-xl px-4 py-2 flex-grow focus:outline-none focus:border-[#ff0055] transition-all"
-              onKeyDown={(e) => e.key === 'Enter' && addPlayer()}
-            />
-            <button onClick={addPlayer} className="btn-primary px-6 rounded-xl">+</button>
+      {screen === 'entry' && (
+        <div className="flex flex-col items-center justify-center min-h-screen p-6 max-w-md mx-auto animate-in fade-in slide-in-from-bottom-5 relative">
+          <button 
+            onClick={toggleTheme}
+            className={`absolute top-6 right-6 p-3 rounded-full glass border border-white/20 shadow-lg ${theme === 'dark' ? 'text-white/60 hover:text-white' : 'text-black/60 hover:text-black'}`}
+          >
+            {theme === 'dark' ? <Icons.Sun /> : <Icons.Moon />}
+          </button>
+
+          <h1 className="font-bebas text-8xl mb-4 italic tracking-tighter text-center">PECADOS <span className="text-[#ff0055]">HOT</span></h1>
+          <p className="text-[#ff0055] font-black uppercase tracking-[0.4em] mb-12 text-xs">Cero Censura</p>
+          
+          <div className={`w-full glass p-6 rounded-[35px] mb-10 border border-white/10 ${theme === 'dark' ? '' : 'bg-black/[0.02]'}`}>
+            <h2 className={`text-sm font-black mb-4 flex items-center gap-2 uppercase tracking-widest ${theme === 'dark' ? 'text-zinc-400' : 'text-zinc-600'}`}><Icons.Users /> Pecadores:</h2>
+            <div className="flex gap-2 mb-6">
+              <input 
+                type="text" 
+                value={newPlayerName} 
+                onChange={(e) => setNewPlayerName(e.target.value)}
+                placeholder="Nombre..."
+                className={`border rounded-2xl px-5 py-3 flex-grow focus:outline-none focus:border-[#ff0055] transition-all ${theme === 'dark' ? 'bg-white/5 border-white/10 text-white' : 'bg-black/5 border-black/10 text-black'}`}
+                onKeyDown={(e) => e.key === 'Enter' && addPlayer()}
+              />
+              <button onClick={addPlayer} className="btn-primary px-6 rounded-2xl font-bold text-xl text-white">+</button>
+            </div>
+            <div className="flex flex-wrap gap-2 max-h-40 overflow-y-auto">
+              {players.map(p => (
+                <span key={p.id} className={`px-4 py-2 rounded-full text-sm font-bold flex items-center gap-3 border ${theme === 'dark' ? 'bg-white/10 border-white/5 text-white' : 'bg-black/5 border-black/10 text-black'}`}>
+                  {p.name}
+                  <button onClick={() => setPlayers(players.filter(pl => pl.id !== p.id))} className="text-red-500 opacity-50 hover:opacity-100 transition-opacity">×</button>
+                </span>
+              ))}
+            </div>
           </div>
-          <div className="flex flex-wrap gap-2 max-h-32 overflow-y-auto">
-            {players.map(p => (
-              <span key={p.id} className="bg-white/10 px-3 py-1 rounded-full text-sm flex items-center gap-2 border border-white/5 animate-in zoom-in">
-                {p.name}
-                <button onClick={() => setPlayers(players.filter(pl => pl.id !== p.id))} className="text-white/40 hover:text-red-500">×</button>
-              </span>
-            ))}
+
+          <div className="grid grid-cols-1 gap-4 w-full">
+            <button 
+              disabled={players.length < 2}
+              onClick={() => { setMode('truth_or_shot'); getNextCard('truth_or_shot'); setScreen('game'); }}
+              className={`glass p-6 rounded-[30px] border border-white/10 hover:border-[#ff0055] transition-all text-left flex items-center justify-between disabled:opacity-30 disabled:cursor-not-allowed group ${theme === 'dark' ? '' : 'hover:bg-black/[0.02]'}`}
+            >
+              <div>
+                <h3 className={`text-2xl font-black mb-1 group-hover:text-[#ff0055] ${theme === 'dark' ? 'text-white' : 'text-black'}`}>VERDAD O SHOT</h3>
+                <p className="text-zinc-500 text-xs font-bold uppercase tracking-widest">Confiesa o fondo</p>
+              </div>
+              <div className="text-[#ff0055]"><Icons.Flame /></div>
+            </button>
+
+            <button 
+              disabled={players.length < 2}
+              onClick={() => { setMode('never_have_i_ever'); getNextCard('never_have_i_ever'); setScreen('game'); }}
+              className={`glass p-6 rounded-[30px] border border-white/10 hover:border-[#bc13fe] transition-all text-left flex items-center justify-between disabled:opacity-30 disabled:cursor-not-allowed group ${theme === 'dark' ? '' : 'hover:bg-black/[0.02]'}`}
+            >
+              <div>
+                <h3 className={`text-2xl font-black mb-1 group-hover:text-[#bc13fe] ${theme === 'dark' ? 'text-white' : 'text-black'}`}>YO NUNCA NUNCA</h3>
+                <p className="text-zinc-500 text-xs font-bold uppercase tracking-widest">Si lo has hecho, bebes</p>
+              </div>
+              <div className="text-[#bc13fe]"><Icons.Drink /></div>
+            </button>
+
+            <button 
+              disabled={players.length < 2}
+              onClick={() => { setMode('pictorami'); getNextCard('pictorami'); setScreen('game'); }}
+              className={`glass p-6 rounded-[30px] border border-white/10 hover:border-cyan-400 transition-all text-left flex items-center justify-between disabled:opacity-30 disabled:cursor-not-allowed group ${theme === 'dark' ? '' : 'hover:bg-black/[0.02]'}`}
+            >
+              <div>
+                <h3 className={`text-2xl font-black mb-1 group-hover:text-cyan-400 ${theme === 'dark' ? 'text-white' : 'text-black'}`}>PICTORAMI HOT</h3>
+                <p className="text-zinc-500 text-xs font-bold uppercase tracking-widest">Dibuja y adivinen</p>
+              </div>
+              <div className="text-cyan-400"><Icons.Draw /></div>
+            </button>
           </div>
         </div>
+      )}
 
-        <div className="grid grid-cols-1 gap-4 w-full">
-          <button 
-            disabled={players.length < 2}
-            onClick={() => { setMode('truth_or_shot'); getNextCard('truth_or_shot'); setScreen('game'); }}
-            className="group glass p-6 rounded-3xl border border-white/10 hover:border-[#ff0055] transition-all text-left flex items-center justify-between disabled:opacity-50"
-          >
-            <div>
-              <h3 className="text-2xl font-black mb-1 group-hover:text-[#ff0055] transition-colors">VERDAD O SHOT</h3>
-              <p className="text-white/40 text-sm">Preguntas que te harán sonrojar.</p>
-            </div>
-            <div className="text-[#ff0055]"><Icons.Flame /></div>
-          </button>
+      {screen === 'game' && (
+        <div className="flex flex-col items-center justify-center min-h-screen p-6 animate-in fade-in">
+          <HomeButton />
+          
+          <div className={`fixed top-8 right-8 text-right p-4 rounded-3xl border border-white/10 backdrop-blur-xl z-50 glass ${theme === 'dark' ? 'bg-white/5' : 'bg-black/5'}`}>
+            <p className="text-[10px] uppercase tracking-widest text-[#ff0055] font-black">Turno de:</p>
+            <p className={`text-2xl font-black ${theme === 'dark' ? 'text-white' : 'text-black'}`}>{players[activePlayerIndex]?.name}</p>
+            <p className="text-xs text-zinc-500 font-bold">{players[activePlayerIndex]?.points} PTS</p>
+          </div>
 
-          <button 
-            disabled={players.length < 2}
-            onClick={() => { setMode('never_have_i_ever'); getNextCard('never_have_i_ever'); setScreen('game'); }}
-            className="group glass p-6 rounded-3xl border border-white/10 hover:border-[#bc13fe] transition-all text-left flex items-center justify-between disabled:opacity-50"
-          >
-            <div>
-              <h3 className="text-2xl font-black mb-1 group-hover:text-[#bc13fe] transition-colors">YO NUNCA NUNCA</h3>
-              <p className="text-white/40 text-sm">Confiesa tus pecados más oscuros.</p>
-            </div>
-            <div className="text-[#bc13fe]"><Icons.Drink /></div>
-          </button>
+          <div className="w-full max-w-2xl mt-12">
+            {loading ? (
+              <div className="flex flex-col items-center gap-6 py-24">
+                <div className={`w-20 h-20 border-8 rounded-full animate-spin ${theme === 'dark' ? 'border-white/5 border-t-[#ff0055]' : 'border-black/5 border-t-[#ff0055]'}`}></div>
+                <p className="font-bebas text-3xl animate-pulse text-[#ff0055]">SOLTANDO LA BOMBA...</p>
+              </div>
+            ) : (
+              <div className="flex flex-col gap-8 items-center">
+                
+                {mode === 'pictorami' ? (
+                  <div className="w-full flex flex-col gap-6 items-center animate-in zoom-in duration-500">
+                    <div className={`glass p-12 md:p-20 rounded-[60px] w-full text-center relative overflow-hidden border-b-8 border-cyan-400 shadow-2xl min-h-[350px] flex flex-col justify-center ${theme === 'dark' ? '' : 'bg-black/[0.02]'}`}>
+                      <p className="text-xs uppercase tracking-[0.5em] mb-10 text-cyan-500 font-black italic">DIBUJA ESTO:</p>
+                      <h2 className={`text-5xl md:text-7xl font-black leading-tight drop-shadow-2xl uppercase tracking-tighter ${theme === 'dark' ? 'text-white' : 'text-black'}`}>
+                        {currentContent}
+                      </h2>
+                    </div>
+                    <div className={`p-6 rounded-3xl text-center max-w-md ${theme === 'dark' ? 'bg-white/5 text-zinc-500' : 'bg-black/5 text-zinc-600'}`}>
+                      <p className="text-sm font-bold uppercase tracking-widest italic">Toma un papel o usa tu imaginación. ¡Dibuja esto y que los demás adivinen!</p>
+                    </div>
+                  </div>
+                ) : (
+                  <div className={`glass p-12 md:p-20 rounded-[60px] w-full text-center relative overflow-hidden border-t-8 border-[#ff0055] min-h-[350px] flex flex-col justify-center shadow-2xl shadow-red-500/10 ${theme === 'dark' ? '' : 'bg-black/[0.02]'}`}>
+                     <p className="text-xs uppercase tracking-[0.5em] mb-10 text-[#ff0055] font-black italic">
+                      {mode === 'truth_or_shot' ? 'Dilo o Shot' : 'Yo Nunca Nunca'}
+                     </p>
+                     <h2 className={`text-4xl md:text-6xl font-black leading-tight drop-shadow-2xl ${theme === 'dark' ? 'text-white' : 'text-black'}`}>
+                      "{currentContent}"
+                     </h2>
+                  </div>
+                )}
 
-          <button 
-            disabled={players.length < 2}
-            onClick={() => { setMode('pictorami'); getNextCard('pictorami'); setScreen('game'); }}
-            className="group glass p-6 rounded-3xl border border-white/10 hover:border-cyan-400 transition-all text-left flex items-center justify-between disabled:opacity-50"
-          >
-            <div>
-              <h3 className="text-2xl font-black mb-1 group-hover:text-cyan-400 transition-colors">PICTORAMI</h3>
-              <p className="text-white/40 text-sm">Dibuja el fetiche y que adivinen.</p>
-            </div>
-            <div className="text-cyan-400"><Icons.Draw /></div>
-          </button>
-        </div>
-        
-        {players.length < 2 && (
-          <p className="mt-4 text-zinc-500 text-sm italic">Mínimo 2 pecadores para empezar...</p>
-        )}
-      </div>
-    );
-  }
-
-  // --- Game Screen Fix: Added the missing game screen logic ---
-  if (screen === 'game') {
-    const currentPlayer = players[activePlayerIndex];
-
-    return (
-      <div className="flex flex-col items-center justify-center min-h-screen p-4 animate-in fade-in duration-500 overflow-hidden">
-        <HomeButton />
-        
-        <div className="fixed top-8 right-8 text-right bg-white/5 p-4 rounded-2xl border border-white/10 backdrop-blur-xl">
-          <p className="text-xs uppercase tracking-widest text-[#ff0055] font-black">Turno de:</p>
-          <p className="text-2xl font-black">{currentPlayer?.name}</p>
-          <p className="text-xs text-zinc-500">{currentPlayer?.points} pts</p>
-        </div>
-
-        <div className="w-full max-w-2xl">
-          {loading ? (
-            <div className="flex flex-col items-center gap-6 py-20">
-              <div className="relative">
-                <div className="w-20 h-20 border-4 border-[#ff0055]/20 border-t-[#ff0055] rounded-full animate-spin"></div>
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <Icons.Flame />
+                <div className="flex gap-4 w-full max-w-md mt-6">
+                  <button 
+                    onClick={() => handleNextTurn(false)}
+                    className={`flex-1 py-6 rounded-[30px] border font-black uppercase tracking-widest active:scale-95 transition-all text-red-500 ${theme === 'dark' ? 'bg-zinc-900 border-white/10 hover:bg-zinc-800' : 'bg-white border-black/10 hover:bg-zinc-100'}`}
+                  >
+                    SHOT 🥃
+                  </button>
+                  <button 
+                    onClick={() => handleNextTurn(true)}
+                    className="flex-1 py-6 rounded-[30px] btn-primary font-black uppercase tracking-widest active:scale-95 shadow-xl shadow-red-500/20 text-white"
+                  >
+                    HOT 🔥
+                  </button>
                 </div>
               </div>
-              <p className="font-bebas text-2xl animate-pulse text-zinc-400">PREPARANDO EL PECADO...</p>
-            </div>
-          ) : (
-            <div className="flex flex-col gap-8 items-center">
-              
-              {mode === 'pictorami' ? (
-                <div className="w-full flex flex-col gap-4 items-center">
-                   <div className="glass p-8 rounded-3xl w-full text-center border-b-4 border-cyan-400">
-                    <p className="text-xs uppercase tracking-[0.2em] mb-4 text-cyan-400 font-black">DIBUJA ESTO:</p>
-                    <h2 className="text-4xl font-black text-white">{currentContent}</h2>
-                  </div>
-                  
-                  <div className="relative w-full aspect-square max-w-[500px] bg-white rounded-3xl overflow-hidden shadow-2xl cursor-crosshair border-8 border-white">
-                    <canvas 
-                      ref={canvasRef}
-                      width={500}
-                      height={500}
-                      className="w-full h-full touch-none"
-                      onMouseDown={startDrawing}
-                      onMouseMove={draw}
-                      onMouseUp={stopDrawing}
-                      onMouseLeave={stopDrawing}
-                      onTouchStart={startDrawing}
-                      onTouchMove={draw}
-                      onTouchEnd={stopDrawing}
-                    />
-                    <button 
-                      onClick={clearCanvas}
-                      className="absolute top-4 right-4 p-3 bg-zinc-100 hover:bg-zinc-200 text-zinc-800 rounded-full shadow-lg transition-all active:scale-90"
-                    >
-                      <Icons.Refresh />
-                    </button>
-                  </div>
-                </div>
-              ) : (
-                <div className="glass p-12 rounded-[50px] w-full text-center relative overflow-hidden group border-t-4 border-[#ff0055] min-h-[300px] flex flex-col justify-center">
-                   <div className="absolute -top-10 -right-10 w-40 h-40 bg-[#ff0055]/5 blur-3xl rounded-full"></div>
-                   <div className="absolute -bottom-10 -left-10 w-40 h-40 bg-[#bc13fe]/5 blur-3xl rounded-full"></div>
-                   <p className="text-xs uppercase tracking-[0.3em] mb-8 text-[#ff0055] font-black italic">
-                    {mode === 'truth_or_shot' ? 'Dile la verdad o toma un shot' : 'Si lo has hecho, toma un shot'}
-                   </p>
-                   <h2 className="text-4xl md:text-5xl font-black leading-tight text-white mb-4 drop-shadow-lg">
-                    "{currentContent}"
-                   </h2>
-                </div>
-              )}
-
-              <div className="flex gap-4 w-full max-w-md">
-                <button 
-                  onClick={() => handleNextTurn(false)}
-                  className="flex-1 py-5 rounded-2xl bg-zinc-900 border border-white/10 font-bold hover:bg-zinc-800 transition-all active:scale-95"
-                >
-                  PASO / SHOT
-                </button>
-                <button 
-                  onClick={() => handleNextTurn(true)}
-                  className="flex-1 py-5 rounded-2xl bg-gradient-to-r from-[#ff0055] to-[#bc13fe] font-bold shadow-lg shadow-red-500/20 hover:brightness-110 transition-all active:scale-95"
-                >
-                  {mode === 'pictorami' ? 'ADIVINADO!' : 'CUMPLIDO!'}
-                </button>
-              </div>
-            </div>
-          )}
+            )}
+          </div>
         </div>
-      </div>
-    );
-  }
-
-  return null;
+      )}
+    </div>
+  );
 };
 
-// --- Rendering Fix: Added root rendering call ---
 const container = document.getElementById('root');
 if (container) {
   const root = createRoot(container);
