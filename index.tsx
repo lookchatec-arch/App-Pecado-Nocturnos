@@ -67,11 +67,13 @@ const Icons = {
   Lock: () => <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>,
   Sun: () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>,
   Moon: () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>,
+  Smartphone: () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="14" height="20" x="5" y="2" rx="2" ry="2"/><path d="M12 18h.01"/></svg>,
 };
 
 const App = () => {
   const [screen, setScreen] = useState('age_check');
   const [theme, setTheme] = useState<'dark' | 'light'>('dark');
+  const [isFullScreen, setIsFullScreen] = useState(false);
   const [players, setPlayers] = useState<{id: number, name: string, points: number}[]>([]);
   const [activePlayerIndex, setActivePlayerIndex] = useState(0);
   const [mode, setMode] = useState<null | 'truth_or_shot' | 'never_have_i_ever' | 'pictorami'>(null);
@@ -81,8 +83,27 @@ const App = () => {
   const [newPlayerName, setNewPlayerName] = useState("");
   const [usedContent, setUsedContent] = useState<string[]>([]);
 
+  // Escuchar cambios de pantalla completa para sincronizar el estado
+  useEffect(() => {
+    const handleFsChange = () => setIsFullScreen(!!document.fullscreenElement);
+    document.addEventListener('fullscreenchange', handleFsChange);
+    return () => document.removeEventListener('fullscreenchange', handleFsChange);
+  }, []);
+
   const toggleTheme = () => {
     setTheme(prev => prev === 'dark' ? 'light' : 'dark');
+  };
+
+  const toggleFullScreen = () => {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen().catch((e) => {
+        console.error(`Error al intentar activar pantalla completa: ${e.message}`);
+      });
+    } else {
+      if (document.exitFullscreen) {
+        document.exitFullscreen();
+      }
+    }
   };
 
   const getAiContent = async (selectedMode: string) => {
@@ -161,14 +182,23 @@ const App = () => {
       <button 
         onClick={() => setScreen('entry')}
         className={`glass p-3 rounded-full transition-all active:scale-90 border border-white/20 shadow-lg ${theme === 'dark' ? 'bg-white/5 text-white/60 hover:text-white' : 'bg-black/5 text-black/60 hover:text-black'}`}
+        title="Volver al inicio"
       >
         <Icons.Home />
       </button>
       <button 
         onClick={toggleTheme}
         className={`glass p-3 rounded-full transition-all active:scale-90 border border-white/20 shadow-lg ${theme === 'dark' ? 'bg-white/5 text-white/60 hover:text-white' : 'bg-black/5 text-black/60 hover:text-black'}`}
+        title="Cambiar tema"
       >
         {theme === 'dark' ? <Icons.Sun /> : <Icons.Moon />}
+      </button>
+      <button 
+        onClick={toggleFullScreen}
+        className={`glass p-3 rounded-full transition-all active:scale-90 border border-white/20 shadow-lg ${theme === 'dark' ? 'bg-white/5 text-white/60 hover:text-white' : 'bg-black/5 text-black/60 hover:text-black'} ${isFullScreen ? 'ring-2 ring-[#ff0055]' : ''}`}
+        title="Modo Celular (Pantalla Completa)"
+      >
+        <Icons.Smartphone />
       </button>
     </div>
   );
@@ -204,12 +234,20 @@ const App = () => {
 
       {screen === 'entry' && (
         <div className="flex flex-col items-center justify-center min-h-screen p-6 max-w-md mx-auto animate-in fade-in slide-in-from-bottom-5 relative">
-          <button 
-            onClick={toggleTheme}
-            className={`absolute top-6 right-6 p-3 rounded-full glass border border-white/20 shadow-lg ${theme === 'dark' ? 'text-white/60 hover:text-white' : 'text-black/60 hover:text-black'}`}
-          >
-            {theme === 'dark' ? <Icons.Sun /> : <Icons.Moon />}
-          </button>
+          <div className="absolute top-6 right-6 flex gap-2">
+            <button 
+              onClick={toggleTheme}
+              className={`p-3 rounded-full glass border border-white/20 shadow-lg transition-all active:scale-90 ${theme === 'dark' ? 'text-white/60 hover:text-white' : 'text-black/60 hover:text-black'}`}
+            >
+              {theme === 'dark' ? <Icons.Sun /> : <Icons.Moon />}
+            </button>
+            <button 
+              onClick={toggleFullScreen}
+              className={`p-3 rounded-full glass border border-white/20 shadow-lg transition-all active:scale-90 ${theme === 'dark' ? 'text-white/60 hover:text-white' : 'text-black/60 hover:text-black'} ${isFullScreen ? 'ring-2 ring-[#ff0055]' : ''}`}
+            >
+              <Icons.Smartphone />
+            </button>
+          </div>
 
           <h1 className="font-bebas text-8xl mb-4 italic tracking-tighter text-center">PECADOS <span className="text-[#ff0055]">HOT</span></h1>
           <p className="text-[#ff0055] font-black uppercase tracking-[0.4em] mb-12 text-xs">Cero Censura</p>
@@ -269,7 +307,7 @@ const App = () => {
             >
               <div>
                 <h3 className={`text-2xl font-black mb-1 group-hover:text-cyan-400 ${theme === 'dark' ? 'text-white' : 'text-black'}`}>PICTORAMI HOT</h3>
-                <p className="text-zinc-500 text-xs font-bold uppercase tracking-widest">Dibuja y adivinen</p>
+                <p className="text-zinc-500 text-xs font-bold uppercase tracking-widest">Adivina el secreto</p>
               </div>
               <div className="text-cyan-400"><Icons.Draw /></div>
             </button>
